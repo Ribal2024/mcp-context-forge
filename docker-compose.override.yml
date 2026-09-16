@@ -1,0 +1,42 @@
+services:
+  nginx:
+    ports: !override
+      - "9010:80"
+
+  fast_time_server:
+    ports: !override
+      - "9011:9080"
+
+  postgres:
+    ports: !override
+      - "9112:5432"
+
+  redis:
+    ports: !override
+      - "9113:6379"
+
+  pgbouncer:
+    ports: !override
+      - "9114:6432"
+
+  migration:
+    environment:
+      - PLATFORM_ADMIN_PASSWORD=${PLATFORM_ADMIN_PASSWORD}
+      - PLATFORM_ADMIN_EMAIL=${PLATFORM_ADMIN_EMAIL}
+
+  gateway:
+    environment:
+      - GUNICORN_WORKERS=2
+      - VALIDATION_STRICT=false
+      - PLATFORM_ADMIN_PASSWORD=${PLATFORM_ADMIN_PASSWORD}
+      - BASIC_AUTH_PASSWORD=${BASIC_AUTH_PASSWORD}
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: "2"
+          memory: 3G
+        reservations:
+          cpus: "1"
+          memory: 1G

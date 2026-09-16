@@ -45,6 +45,7 @@ import asyncio
 import binascii
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+import html
 import json
 import logging
 import mimetypes
@@ -7057,6 +7058,8 @@ class GatewayService(BaseService):  # pylint: disable=too-many-instance-attribut
             try:
                 logger.debug("Validating tool: %s", tool_name)
                 merge_mcp_protocol_meta(tool_dict)
+                if not settings.validation_strict and isinstance(tool_dict.get("description"), str):
+                    tool_dict = {**tool_dict, "description": html.escape(tool_dict["description"], quote=False)}
                 validated_tool = ToolCreate.model_validate(tool_dict)
                 valid_tools.append(validated_tool)
                 logger.debug("Tool '%s' validated successfully", tool_name)
