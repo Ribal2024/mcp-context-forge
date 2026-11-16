@@ -8,10 +8,12 @@ services:
       - "9011:9080"
 
   postgres:
+    restart: unless-stopped
     ports: !override
       - "9112:5432"
 
   redis:
+    restart: unless-stopped
     ports: !override
       - "9113:6379"
 
@@ -40,3 +42,13 @@ services:
         reservations:
           cpus: "1"
           memory: 1G
+    # radio-yahala's MCP servers are reached by service name on their own network (2026-10-15): the old
+    # host.docker.internal:<port> path goes through Windows host port forwarding, which hung and cut GD off
+    networks:
+      - mcpnet
+      - yahala
+
+networks:
+  yahala:
+    external: true
+    name: radio-yahala_yahala-network
