@@ -2,6 +2,10 @@ services:
   nginx:
     ports: !override
       - "9010:80"
+    # GD calls ContextForge at http://nginx/... over the shared link network (see networks below).
+    networks:
+      - mcpnet
+      - yahala-mcp-link
 
   fast_time_server:
     ports: !override
@@ -42,13 +46,17 @@ services:
         reservations:
           cpus: "1"
           memory: 1G
-    # radio-yahala's MCP servers are reached by service name on their own network (2026-10-15): the old
-    # host.docker.internal:<port> path goes through Windows host port forwarding, which hung and cut GD off
+    # radio-yahala's MCP servers are reached by service name (2026-10-15: the old host.docker.internal:<port>
+    # path through Windows port forwarding hung and cut GD off). Since 2026-11-16 this goes over a small shared
+    # network instead of joining the station's whole network: only GD, the station's MCP servers, nginx and
+    # gateway are on it, so neither side can reach the other's databases.
     networks:
       - mcpnet
-      - yahala
+      - yahala-mcp-link
 
 networks:
-  yahala:
+  # Shared with radio-yahala; owned by neither compose project. Create it once per machine:
+  #   docker network create yahala-mcp-link
+  yahala-mcp-link:
     external: true
-    name: radio-yahala_yahala-network
+    name: yahala-mcp-link
